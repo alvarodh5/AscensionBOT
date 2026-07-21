@@ -35,7 +35,19 @@ namespace CasterBot
                 return;
 
             // Being attacked -> stop resting, go fight.
-            if (ObjectManager.Player.IsInCombat || ObjectManager.Units.Any(u => u.TargetGuid == ObjectManager.Player.Guid))
+            //
+            // We require an ACTUAL live aggressor (a unit targeting us), NOT the bare IsInCombat
+            // flag: that flag lingers for a few seconds after a kill, so RestState used to bail
+            // out the instant it started, popping back to GrindState while still low on HP. With
+            // no threat and the health gate failing (we're hurt), GrindState then found no target
+            // and roamed all the way back to the anchor to "rest" instead of healing in place —
+            // the intermittent "walks to the anchor when low" behaviour. Resting in place and
+            // self-healing is what we actually want here.
+            var me = ObjectManager.Player;
+            var underAttack = ObjectManager.Units.Any(u =>
+                u.Health > 0 && !u.TappedByOther &&
+                (u.TargetGuid == me.Guid || u.TargetGuid == ObjectManager.Pet?.Guid));
+            if (underAttack)
             {
                 player.Stand();
                 botStates.Pop();
