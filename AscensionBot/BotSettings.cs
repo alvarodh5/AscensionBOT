@@ -27,9 +27,12 @@ namespace AscensionBot
         public string TargetingIncludedNames { get; set; } = "";
         public string TargetingExcludedNames { get; set; } = "";
 
-        // Wide by default = level filtering effectively off (Ascension scales mobs).
-        public int LevelRangeMin { get; set; } = 100;
-        public int LevelRangeMax { get; set; } = 100;
+        // Level filtering (configurable in botSettings.json):
+        //   LevelRangeMax = how many levels ABOVE the player a mob can be (target if Level <= player+Max)
+        //   LevelRangeMin = how many levels BELOW the player a mob can be (target if Level >= player-Min)
+        // Defaults: engage from 5 below up to 3 above. Set both to 100 to effectively disable.
+        public int LevelRangeMin { get; set; } = 5;
+        public int LevelRangeMax { get; set; } = 3;
 
         public bool CreatureTypeBeast { get; set; } = true;
         public bool CreatureTypeDragonkin { get; set; } = true;
@@ -42,6 +45,11 @@ namespace AscensionBot
         public bool UnitReactionHostile { get; set; } = true;
         public bool UnitReactionUnfriendly { get; set; } = true;
         public bool UnitReactionNeutral { get; set; } = true;
+
+        // Caster profile only: loot corpses after a kill. Off by default (the Caster is meant
+        // to be a fast, hands-off ranged farmer that doesn't stop to loot). The Melee profile
+        // always loots regardless of this flag.
+        public bool CasterLootEnabled { get; set; } = false;
 
         public bool LootPoor { get; set; } = true;
         public bool LootCommon { get; set; } = true;

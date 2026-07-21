@@ -11,7 +11,7 @@ namespace CasterBot
     //  - Attacks from 25 yds with random abilities on action slots 1/2/3.
     //  - Self-heal on slot 4 below 30% HP.
     //  - Only STARTS fights at >=75% HP and >=50% mana (defends if attacked regardless).
-    //  - Rests after each fight. Loot & skinning disabled.
+    //  - Rests after each fight. Loot disabled by default (toggle CasterLootEnabled in settings).
     [Export(typeof(IBot))]
     class CasterBot : Bot, IBot
     {
@@ -43,7 +43,7 @@ namespace CasterBot
             Stack<IBotState> botStates,
             IDependencyContainer container,
             WoWUnit target,
-            bool loot = true) => new CombatState(botStates, container, target, loot);
+            bool loot = false) => new CombatState(botStates, container, target, loot);
 
         public IDependencyContainer GetDependencyContainer(BotSettings botSettings, Probe probe, IEnumerable<Hotspot> hotspots)
         {

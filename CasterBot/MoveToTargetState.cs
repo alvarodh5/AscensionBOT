@@ -22,7 +22,7 @@ namespace CasterBot
         public void Update()
         {
             botStates.Pop();
-            botStates.Push(new CombatState(botStates, container, target));
+            botStates.Push(new CombatState(botStates, container, target, container.BotSettings.CasterLootEnabled));
         }
     }
 }
