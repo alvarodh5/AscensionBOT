@@ -1,0 +1,40 @@
+﻿using AscensionBot.Game;
+using AscensionBot.Game.Objects;
+using System;
+using System.Collections.Generic;
+
+namespace AscensionBot.AI
+{
+    public interface IDependencyContainer
+    {
+        Func<Stack<IBotState>, IDependencyContainer, IBotState> CreateRestState { get; }
+
+        Func<Stack<IBotState>, IDependencyContainer, WoWUnit, IBotState> CreateMoveToTargetState { get; }
+
+        Func<Stack<IBotState>, IDependencyContainer, WoWUnit, WoWPlayer, IBotState> CreatePowerlevelCombatState { get; }
+
+        Func<Stack<IBotState>, IDependencyContainer, WoWUnit, bool, IBotState> CreateCombatState { get; }
+
+        BotSettings BotSettings { get; }
+
+        Probe Probe { get; }
+
+        IEnumerable<Hotspot> Hotspots { get; }
+
+        WoWUnit FindClosestTarget();
+
+        WoWUnit FindThreat();
+
+        Hotspot GetCurrentHotspot();
+
+        GatherRoute GetCurrentGatherRoute();
+
+        void CheckForTravelPath(Stack<IBotState> botStates, bool reverse, bool needsToRest = true);
+
+        bool RunningErrands { get; set; }
+
+        bool UpdatePlayerTrackers();
+
+        bool DisableTeleportChecker { get; set; }
+    }
+}

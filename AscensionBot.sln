@@ -1,0 +1,113 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32228.430
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AscensionBot", "AscensionBot\AscensionBot.csproj", "{0901E784-2977-437E-8A2C-C70F0184EEFB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bootstrapper", "Bootstrapper\Bootstrapper.csproj", "{8089F843-94CA-4348-8C1B-8B443B224E94}"
+	ProjectSection(ProjectDependencies) = postProject
+		{0901E784-2977-437E-8A2C-C70F0184EEFB} = {0901E784-2977-437E-8A2C-C70F0184EEFB}
+		{8E623BB1-1B7B-4F8E-A051-72F53A9AB620} = {8E623BB1-1B7B-4F8E-A051-72F53A9AB620}
+		{C5ED9E2F-C166-4D4C-9E65-47035C38B3EA} = {C5ED9E2F-C166-4D4C-9E65-47035C38B3EA}
+		{C817858E-0656-4211-934B-C672998EDDB3} = {C817858E-0656-4211-934B-C672998EDDB3}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FastCall", "FastCall\FastCall.vcxproj", "{C5ED9E2F-C166-4D4C-9E65-47035C38B3EA}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Navigation", "Navigation\Navigation.vcxproj", "{8E623BB1-1B7B-4F8E-A051-72F53A9AB620}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NavigationTests", "NavigationTests\NavigationTests.vcxproj", "{339B8C16-CAD4-467B-B1F3-F10F7E80F944}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CasterBot", "CasterBot\CasterBot.csproj", "{08772433-7D9D-4020-84A0-EEB307ADF232}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Bots", "Bots", "{9EA6DDFC-036A-49B7-A4FA-AF875355BC2E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MeleeBot", "MeleeBot\MeleeBot.csproj", "{44304F6F-6B0A-40A7-96B4-1EAAF3DB250E}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Loader", "Loader\Loader.vcxproj", "{C817858E-0656-4211-934B-C672998EDDB3}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_SolutionItems", "_SolutionItems", "{8BB7B492-B58F-466F-8B7E-50984944589A}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		LICENSE = LICENSE
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AscensionBotTests", "AscensionBotTests\AscensionBotTests.csproj", "{827E1CEE-7D53-4E99-BC27-9890995040C8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Release", "Release", "{096084F2-AFA4-4281-B283-F964F597E0B3}"
+	ProjectSection(SolutionItems) = preProject
+		Bot\Release\bootstrapperSettings.json = Bot\Release\bootstrapperSettings.json
+		Bot\Release\botSettings.json = Bot\Release\botSettings.json
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Debug", "Debug", "{CA549491-B5F1-4BB0-98E2-65B15113D2AA}"
+	ProjectSection(SolutionItems) = preProject
+		Bot\bootstrapperSettings.json = Bot\bootstrapperSettings.json
+		Bot\botSettings.json = Bot\botSettings.json
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{8989E783-85C5-4A83-9E45-D3AA7D224106}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\FAQ.md = Docs\FAQ.md
+		Docs\Intro.md = Docs\Intro.md
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0901E784-2977-437E-8A2C-C70F0184EEFB}.Debug|x86.ActiveCfg = Debug|x86
+		{0901E784-2977-437E-8A2C-C70F0184EEFB}.Debug|x86.Build.0 = Debug|x86
+		{0901E784-2977-437E-8A2C-C70F0184EEFB}.Release|x86.ActiveCfg = Release|x86
+		{0901E784-2977-437E-8A2C-C70F0184EEFB}.Release|x86.Build.0 = Release|x86
+		{8089F843-94CA-4348-8C1B-8B443B224E94}.Debug|x86.ActiveCfg = Debug|x86
+		{8089F843-94CA-4348-8C1B-8B443B224E94}.Debug|x86.Build.0 = Debug|x86
+		{8089F843-94CA-4348-8C1B-8B443B224E94}.Release|x86.ActiveCfg = Release|x86
+		{8089F843-94CA-4348-8C1B-8B443B224E94}.Release|x86.Build.0 = Release|x86
+		{C5ED9E2F-C166-4D4C-9E65-47035C38B3EA}.Debug|x86.ActiveCfg = Debug|Win32
+		{C5ED9E2F-C166-4D4C-9E65-47035C38B3EA}.Debug|x86.Build.0 = Debug|Win32
+		{C5ED9E2F-C166-4D4C-9E65-47035C38B3EA}.Release|x86.ActiveCfg = Release|Win32
+		{C5ED9E2F-C166-4D4C-9E65-47035C38B3EA}.Release|x86.Build.0 = Release|Win32
+		{8E623BB1-1B7B-4F8E-A051-72F53A9AB620}.Debug|x86.ActiveCfg = Debug|Win32
+		{8E623BB1-1B7B-4F8E-A051-72F53A9AB620}.Debug|x86.Build.0 = Debug|Win32
+		{8E623BB1-1B7B-4F8E-A051-72F53A9AB620}.Release|x86.ActiveCfg = Release|Win32
+		{8E623BB1-1B7B-4F8E-A051-72F53A9AB620}.Release|x86.Build.0 = Release|Win32
+		{339B8C16-CAD4-467B-B1F3-F10F7E80F944}.Debug|x86.ActiveCfg = Debug|Win32
+		{339B8C16-CAD4-467B-B1F3-F10F7E80F944}.Debug|x86.Build.0 = Debug|Win32
+		{339B8C16-CAD4-467B-B1F3-F10F7E80F944}.Release|x86.ActiveCfg = Release|Win32
+		{339B8C16-CAD4-467B-B1F3-F10F7E80F944}.Release|x86.Build.0 = Release|Win32
+		{08772433-7D9D-4020-84A0-EEB307ADF232}.Debug|x86.ActiveCfg = Debug|x86
+		{08772433-7D9D-4020-84A0-EEB307ADF232}.Debug|x86.Build.0 = Debug|x86
+		{08772433-7D9D-4020-84A0-EEB307ADF232}.Release|x86.ActiveCfg = Release|x86
+		{08772433-7D9D-4020-84A0-EEB307ADF232}.Release|x86.Build.0 = Release|x86
+		{44304F6F-6B0A-40A7-96B4-1EAAF3DB250E}.Debug|x86.ActiveCfg = Debug|x86
+		{44304F6F-6B0A-40A7-96B4-1EAAF3DB250E}.Debug|x86.Build.0 = Debug|x86
+		{44304F6F-6B0A-40A7-96B4-1EAAF3DB250E}.Release|x86.ActiveCfg = Release|x86
+		{44304F6F-6B0A-40A7-96B4-1EAAF3DB250E}.Release|x86.Build.0 = Release|x86
+		{C817858E-0656-4211-934B-C672998EDDB3}.Debug|x86.ActiveCfg = Debug|Win32
+		{C817858E-0656-4211-934B-C672998EDDB3}.Debug|x86.Build.0 = Debug|Win32
+		{C817858E-0656-4211-934B-C672998EDDB3}.Release|x86.ActiveCfg = Release|Win32
+		{C817858E-0656-4211-934B-C672998EDDB3}.Release|x86.Build.0 = Release|Win32
+		{827E1CEE-7D53-4E99-BC27-9890995040C8}.Debug|x86.ActiveCfg = Debug|x86
+		{827E1CEE-7D53-4E99-BC27-9890995040C8}.Debug|x86.Build.0 = Debug|x86
+		{827E1CEE-7D53-4E99-BC27-9890995040C8}.Release|x86.ActiveCfg = Release|x86
+		{827E1CEE-7D53-4E99-BC27-9890995040C8}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{08772433-7D9D-4020-84A0-EEB307ADF232} = {9EA6DDFC-036A-49B7-A4FA-AF875355BC2E}
+		{44304F6F-6B0A-40A7-96B4-1EAAF3DB250E} = {9EA6DDFC-036A-49B7-A4FA-AF875355BC2E}
+		{096084F2-AFA4-4281-B283-F964F597E0B3} = {8BB7B492-B58F-466F-8B7E-50984944589A}
+		{CA549491-B5F1-4BB0-98E2-65B15113D2AA} = {8BB7B492-B58F-466F-8B7E-50984944589A}
+		{8989E783-85C5-4A83-9E45-D3AA7D224106} = {8BB7B492-B58F-466F-8B7E-50984944589A}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1D542335-5812-4666-9874-ACFCC515267C}
+	EndGlobalSection
+EndGlobal

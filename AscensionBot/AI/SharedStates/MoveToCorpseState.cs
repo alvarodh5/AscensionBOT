@@ -1,0 +1,103 @@
+﻿using AscensionBot.Game;
+using AscensionBot.Game.Enums;
+using AscensionBot.Game.Objects;
+using System.Collections.Generic;
+
+namespace AscensionBot.AI.SharedStates
+{
+    public class MoveToCorpseState : IBotState
+    {
+        readonly Stack<IBotState> botStates;
+        readonly IDependencyContainer container;
+        readonly LocalPlayer player;
+        readonly StuckHelper stuckHelper;
+
+        bool walkingOnWater;
+        int stuckCount;
+
+        bool initialized;
+
+        Position startingPosition;
+
+        public MoveToCorpseState(Stack<IBotState> botStates, IDependencyContainer container)
+        {
+            this.botStates = botStates;
+            this.container = container;
+            player = ObjectManager.Player;
+            stuckHelper = new StuckHelper(botStates, container);
+        }
+
+        public void Update()
+        {
+            if (!initialized)
+            {
+                container.DisableTeleportChecker = false;
+                startingPosition = player.Position;
+                initialized = true;
+            }
+
+            if (stuckCount == 10)
+            {
+                // Can't reach the corpse (blocked terrain, etc.). Instead of emptying the stack
+                // and stopping — which also stops AntiAfk and gets us disconnected as a ghost —
+                // fall back to resurrecting at the Spirit Healer so the bot keeps running.
+                TelegramClientWrapper.SendMessage($"{player.Name} can't reach corpse; using Spirit Healer.");
+                botStates.Pop();
+                botStates.Push(new ResurrectFromGraveyardState(botStates, container));
+                return;
+            }
+
+            if (stuckHelper.CheckIfStuck())
+                stuckCount++;
+
+            if (player.Position.DistanceTo2D(player.CorpsePosition) < 3)
+            {
+                player.StopAllMovement();
+                botStates.Pop();
+                return;
+            }
+
+            var path = Navigation.CalculatePath(ObjectManager.MapId, player.Position, player.CorpsePosition, false);
+            Position nextWaypoint;
+            if (path.Length <= 1)
+            {
+                if (player.Position.DistanceTo2D(startingPosition) < 10)
+                {
+                    // We can't reach the corpse. E.g. we fell into the void. Try using the spirit
+                    // healer.
+                    botStates.Pop();
+                    botStates.Push(new ResurrectFromGraveyardState(botStates, container));
+                    return;
+                }
+                else
+                {
+                    // We're likely temporarily stuck. Just proceed as normal.
+                    Logger.Log($"Problem building path for mapId \"{ObjectManager.MapId}\". Make sure the \"mmaps\" directory contains the required mmap and tile-files. Returning destination as next waypoint...");
+                    nextWaypoint = player.CorpsePosition;
+                }
+            }
+            else
+            {
+                nextWaypoint = path[1];
+            }
+
+            if (player.Position.Z - nextWaypoint.Z > 5)
+                walkingOnWater = true;
+
+            if (walkingOnWater)
+            {
+                if (!player.IsMoving)
+                    player.StartMovement(ControlBits.Front);
+
+                if (player.Position.Z - nextWaypoint.Z < .05)
+                {
+                    walkingOnWater = false;
+                    player.StopMovement(ControlBits.Front);
+                }
+            }
+
+            else
+                player.MoveToward(nextWaypoint);
+        }
+    }
+}

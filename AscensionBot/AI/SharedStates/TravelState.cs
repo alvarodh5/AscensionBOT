@@ -1,0 +1,57 @@
+﻿using AscensionBot.Game;
+using AscensionBot.Game.Objects;
+using System;
+using System.Collections.Generic;
+
+namespace AscensionBot.AI.SharedStates
+{
+    public class TravelState : IBotState
+    {
+        readonly Stack<IBotState> botStates;
+        readonly IDependencyContainer container;
+        readonly Position[] travelPathWaypoints;
+        readonly Action callback;
+        readonly LocalPlayer player;
+        readonly StuckHelper stuckHelper;
+        
+        int travelPathIndex;
+
+        public TravelState(Stack<IBotState> botStates, IDependencyContainer container, Position[] travelPathWaypoints, int startingIndex, Action callback = null)
+        {
+            this.botStates = botStates;
+            this.container = container;
+            this.travelPathWaypoints = travelPathWaypoints;
+            this.callback = callback;
+            player = ObjectManager.Player;
+            travelPathIndex = startingIndex;
+            stuckHelper = new StuckHelper(botStates, container);
+        }
+
+        public void Update()
+        {
+            var threat = container.FindThreat();
+
+            if (threat != null)
+            {
+                player.StopAllMovement();
+                botStates.Push(container.CreateMoveToTargetState(botStates, container, threat));
+                return;
+            }
+            
+            if (player.Position.DistanceTo(travelPathWaypoints[travelPathIndex]) < 3)
+                travelPathIndex++;
+
+            if (travelPathIndex == travelPathWaypoints.Length)
+            {
+                player.StopAllMovement();
+                botStates.Pop();
+                callback?.Invoke();
+                return;
+            }
+
+            stuckHelper.CheckIfStuck();
+            
+            player.MoveToward(travelPathWaypoints[travelPathIndex]);
+        }
+    }
+}
