@@ -54,6 +54,10 @@ namespace CasterBot
                 return;
             }
 
+            // Periodic self-buff on slot 5 (~every 30 min) while we're safe between pulls.
+            if (CasterBuff.TryBuff(player))
+                return;
+
             var items = Inventory.GetAllItems();
             var foodName = container.BotSettings.Food;
             var drinkName = container.BotSettings.Drink;

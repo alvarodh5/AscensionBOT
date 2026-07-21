@@ -22,7 +22,7 @@ A simple, autonomous grinder: it finds a nearby mob, walks to it, kills it, and 
 
 | Profile | Behaviour |
 |---|---|
-| **Caster** | Ranged. Engages from 25 yds, casts random abilities from action slots **1/2/3**, self-heals with slot **4** below 30% HP. Only starts a fight at ≥75% HP and ≥50% mana (but defends itself if attacked), rests after every fight. Looting is **off by default** (enable with `CasterLootEnabled`). Sends a Telegram session report. |
+| **Caster** | Ranged. Engages from 20 yds, casts random abilities from action slots **1/2/3**, self-heals with slot **4** below 30% HP, and recasts a self-buff on slot **5** every ~30 min. Only starts a fight at ≥75% HP and ≥50% mana (but defends itself if attacked), rests after every fight. Looting is **off by default** (enable with `CasterLootEnabled`). Sends a Telegram session report. |
 | **Melee** | Classless melee. Walks into melee range and spams action slots **1–6** + auto-attack, loots and skins. Includes a `Test` diagnostic that dumps player/offset info. |
 
 ### Features
@@ -69,7 +69,7 @@ Sensible defaults live in code, so the file is tiny — you only override what y
 
 ### Action bar setup
 
-- **Caster** → attacks on slots **1, 2, 3**; heal on slot **4**.
+- **Caster** → attacks on slots **1, 2, 3**; heal on slot **4**; self-buff (recast every ~30 min) on slot **5**.
 - **Melee** → your abilities on slots **1–6**.
 
 ### Credits & License
@@ -92,7 +92,7 @@ Un farmeador simple y autónomo: busca un bicho cercano, va hacia él, lo mata y
 
 | Perfil | Comportamiento |
 |---|---|
-| **Caster** | A distancia. Ataca desde 25 yardas, lanza habilidades aleatorias de los slots **1/2/3**, se cura con el slot **4** por debajo del 30% de vida. Solo inicia combate con ≥75% de vida y ≥50% de maná (pero se defiende si le atacan), descansa tras cada pelea. El loot está **desactivado por defecto** (actívalo con `CasterLootEnabled`). Envía un informe de sesión por Telegram. |
+| **Caster** | A distancia. Ataca desde 20 yardas, lanza habilidades aleatorias de los slots **1/2/3**, se cura con el slot **4** por debajo del 30% de vida y relanza un buff propio en el slot **5** cada ~30 min. Solo inicia combate con ≥75% de vida y ≥50% de maná (pero se defiende si le atacan), descansa tras cada pelea. El loot está **desactivado por defecto** (actívalo con `CasterLootEnabled`). Envía un informe de sesión por Telegram. |
 | **Melee** | Cuerpo a cuerpo classless. Se acerca y machaca los slots **1–6** + auto-ataque, lootea y desuella. Incluye un `Test` de diagnóstico que vuelca info del jugador/offsets. |
 
 ### Características
@@ -139,7 +139,7 @@ Los valores por defecto están en el código, así que el archivo es diminuto �
 
 ### Barra de acción
 
-- **Caster** → ataques en los slots **1, 2, 3**; cura en el slot **4**.
+- **Caster** → ataques en los slots **1, 2, 3**; cura en el slot **4**; buff propio (se relanza cada ~30 min) en el slot **5**.
 - **Melee** → tus habilidades en los slots **1–6**.
 
 ### Créditos y licencia

@@ -10,6 +10,7 @@ namespace CasterBot
     // "Caster" profile: ranged classless caster for Ascension.
     //  - Attacks from 25 yds with random abilities on action slots 1/2/3.
     //  - Self-heal on slot 4 below 30% HP.
+    //  - Self-buff on slot 5, recast every ~30 minutes.
     //  - Only STARTS fights at >=75% HP and >=50% mana (defends if attacked regardless).
     //  - Rests after each fight. Loot disabled by default (toggle CasterLootEnabled in settings).
     [Export(typeof(IBot))]
