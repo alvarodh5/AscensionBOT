@@ -137,7 +137,12 @@ namespace AscensionBot.AI
                 // Only the two safe, definitive flags here — being too broad excludes valid mobs.
                 .Where(u =>
                     !u.UnitFlags.HasFlag(UnitFlags.UNIT_FLAG_NON_ATTACKABLE) &&
-                    !u.UnitFlags.HasFlag(UnitFlags.UNIT_FLAG_NOT_SELECTABLE))
+                    !u.UnitFlags.HasFlag(UnitFlags.UNIT_FLAG_NOT_SELECTABLE) &&
+                    // Never target player-controlled units: our own pet, other players' pets,
+                    // totems, guardians, companions, charms. This flag is reliable even when a
+                    // pet's SummonedByGuid/UnitReaction read oddly on Ascension (which was making
+                    // the bot try to attack its own friendly pet).
+                    !u.UnitFlags.HasFlag(UnitFlags.UNIT_FLAG_PLAYER_CONTROLLED))
                 // apply bot profile specific targeting criteria
                 .Where(u => targetingCriteria(u))
                 .ToList();

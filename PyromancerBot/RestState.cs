@@ -5,12 +5,13 @@ using AscensionBot.Game.Objects;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace CasterBot
+namespace PyromancerBot
 {
-    // Recover after combat (item 7): back up to >=75% HP and >=50% mana. Instead of just
-    // waiting for HP to regenerate, we ACTIVELY self-heal on slot 4 (the client refuses the
-    // cast if we can't afford it, so it naturally stops when mana runs low). If a drink is
-    // configured we top mana up to 90%. If attacked, stop resting and let combat resume.
+    // Recover after combat (improvement 1): back up to >=75% HP and >=50% mana before hunting the
+    // next enemy. Instead of just waiting for HP to regenerate, we ACTIVELY self-heal on slot 4
+    // (the client refuses the cast if we can't afford it, so it naturally stops when mana runs
+    // low). If a drink is configured we top mana up to 90%. If attacked, stop resting and let
+    // combat resume. We also keep "Seal of Al'ar" and "Ashen Skin" up while resting (improvement 2).
     class RestState : IBotState
     {
         const int HpTarget = 75;
@@ -21,6 +22,10 @@ namespace CasterBot
         readonly Stack<IBotState> botStates;
         readonly IDependencyContainer container;
         readonly LocalPlayer player;
+
+        // Only ONE post-combat heal per rest: cast it once if we're below 75%, then stop (a single
+        // heal usually overshoots and a second just wastes mana). Resets each fight (new RestState).
+        bool healCast;
 
         public RestState(Stack<IBotState> botStates, IDependencyContainer container)
         {
@@ -65,8 +70,8 @@ namespace CasterBot
                 return;
             }
 
-            // Periodic self-buff on slot 5 (~every 30 min) while we're safe between pulls.
-            if (CasterBuff.TryBuff(player))
+            // Keep "Seal of Al'ar" and "Ashen Skin" up while we're safe between pulls (improvement 2).
+            if (PyromancerBuff.Maintain(player))
                 return;
 
             var items = Inventory.GetAllItems();
@@ -80,7 +85,11 @@ namespace CasterBot
             var hpOk = player.HealthPercent >= HpTarget;
             var manaOk = player.MaxMana <= 0 || player.ManaPercent >= manaTarget;
 
-            if (hpOk && manaOk)
+            // With no food configured we only cast ONE heal per rest, so HP counts as "done" once
+            // that single heal has gone out — we don't keep topping up to 75% and burning mana.
+            var hpDone = hpOk || (foodItem == null && healCast);
+
+            if (hpDone && manaOk)
             {
                 player.Stand();
                 botStates.Pop();
@@ -92,18 +101,19 @@ namespace CasterBot
             {
                 if (foodItem != null)
                 {
-                    // A configured food heals for free (no mana) — prefer it.
+                    // A configured food heals for free (no mana) — prefer it, eat until full.
                     if (!player.IsEating)
                         foodItem.Use();
                 }
-                else if (player.Mana > 0 && !player.IsCasting && !player.IsChanneling)
+                else if (!healCast && player.Mana > 0 && !player.IsCasting && !player.IsChanneling)
                 {
-                    // No food: self-heal with slot 4 instead of waiting for regen. "Si el maná
-                    // se lo permite" is enforced by the client — UseAction is ignored when we
-                    // can't afford the heal (or it's on cooldown), so healing simply stops when
-                    // mana runs low and we let it regen (or drink) for the next pull.
-                    if (Wait.For("CasterRestHeal", 500))
-                        player.LuaCall($"UseAction({HealSlot})");
+                    // No food: cast slot 4 exactly ONCE. Select ourselves first so the heal has a
+                    // valid friendly target (no enemy around while resting), then press slot 4.
+                    if (Wait.For("PyromancerRestHeal", 500))
+                    {
+                        player.LuaCall($"TargetUnit('player'); UseAction({HealSlot});");
+                        healCast = true;
+                    }
                 }
             }
 

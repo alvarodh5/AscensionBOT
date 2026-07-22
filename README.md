@@ -22,8 +22,9 @@ A simple, autonomous grinder: it finds a nearby mob, walks to it, kills it, and 
 
 | Profile | Behaviour |
 |---|---|
-| **Caster** | Ranged. Engages from 20 yds, casts random abilities from action slots **1/2/3**, self-heals with slot **4** below 30% HP, and recasts a self-buff on slot **5** every ~30 min. Only starts a fight at ≥75% HP and ≥50% mana (but defends itself if attacked), rests after every fight. Looting is **off by default** (enable with `CasterLootEnabled`). Sends a Telegram session report. |
+| **Primalist** | Ranged. Engages from 20 yds, casts random abilities from action slots **1/2/3**, self-heals with slot **4** below 30% HP, and keeps the self-buff **"Grove Instinct"** (slot **5**) up, recasting it whenever it drops (incl. after resurrecting). Only starts a fight at ≥75% HP and ≥50% mana (but defends itself if attacked), rests after every fight. Looting is **off by default** (enable with `CasterLootEnabled`). Sends a Telegram session report. |
 | **Melee** | Classless melee. Walks into melee range and spams action slots **1–6** + auto-attack, loots and skins. Includes a `Test` diagnostic that dumps player/offset info. |
+| **Pyromancer** | Ranged variant of Primalist with three tweaks: (1) after every fight it actively tops HP back up with slot **4** before hunting again (instead of waiting for regen); (2) keeps two self-buffs always up — **"Seal of Al'ar"** and **"Ashen Skin"** — recasting either the moment it drops; (3) attacks from 25 yds. Same "only start a fight at ≥75% HP / ≥50% mana, defend if attacked" rule. Sends a Telegram session report. |
 
 ### Features
 
@@ -56,7 +57,7 @@ Sensible defaults live in code, so the file is tiny — you only override what y
 
 ```json
 {
-  "CurrentBotName": "Caster",
+  "CurrentBotName": "Primalist",
   "TelegramEnabled": false,
   "TelegramBotToken": "",
   "TelegramChatId": "",
@@ -69,8 +70,9 @@ Sensible defaults live in code, so the file is tiny — you only override what y
 
 ### Action bar setup
 
-- **Caster** → attacks on slots **1, 2, 3**; heal on slot **4**; self-buff (recast every ~30 min) on slot **5**.
+- **Primalist** → attacks on slots **1, 2, 3**; heal on slot **4**; the "Grove Instinct" buff on slot **5** (kept up automatically while it's on that slot).
 - **Melee** → your abilities on slots **1–6**.
+- **Pyromancer** → attacks on slots **1, 2, 3**; heal on slot **4**. The two upkeep buffs are cast by name ("Seal of Al'ar", "Ashen Skin"), so they don't depend on a slot — just make sure your character knows them.
 
 ### Credits & License
 
@@ -92,8 +94,9 @@ Un farmeador simple y autónomo: busca un bicho cercano, va hacia él, lo mata y
 
 | Perfil | Comportamiento |
 |---|---|
-| **Caster** | A distancia. Ataca desde 20 yardas, lanza habilidades aleatorias de los slots **1/2/3**, se cura con el slot **4** por debajo del 30% de vida y relanza un buff propio en el slot **5** cada ~30 min. Solo inicia combate con ≥75% de vida y ≥50% de maná (pero se defiende si le atacan), descansa tras cada pelea. El loot está **desactivado por defecto** (actívalo con `CasterLootEnabled`). Envía un informe de sesión por Telegram. |
+| **Primalist** | A distancia. Ataca desde 20 yardas, lanza habilidades aleatorias de los slots **1/2/3**, se cura con el slot **4** por debajo del 30% de vida y mantiene el buff propio **"Grove Instinct"** (slot **5**), relanzándolo en cuanto se cae (incl. tras resucitar). Solo inicia combate con ≥75% de vida y ≥50% de maná (pero se defiende si le atacan), descansa tras cada pelea. El loot está **desactivado por defecto** (actívalo con `CasterLootEnabled`). Envía un informe de sesión por Telegram. |
 | **Melee** | Cuerpo a cuerpo classless. Se acerca y machaca los slots **1–6** + auto-ataque, lootea y desuella. Incluye un `Test` de diagnóstico que vuelca info del jugador/offsets. |
+| **Pyromancer** | Variante a distancia del Primalist con tres mejoras: (1) tras cada pelea se recupera activamente la vida con el slot **4** antes de volver a cazar (en vez de esperar a la regeneración); (2) mantiene dos buffs propios siempre activos — **"Seal of Al'ar"** y **"Ashen Skin"** — relanzando cualquiera en cuanto se cae; (3) ataca desde 25 yardas. Misma regla de "solo inicia combate con ≥75% de vida / ≥50% de maná, se defiende si le atacan". Envía un informe de sesión por Telegram. |
 
 ### Características
 
@@ -126,7 +129,7 @@ Los valores por defecto están en el código, así que el archivo es diminuto �
 
 ```json
 {
-  "CurrentBotName": "Caster",
+  "CurrentBotName": "Primalist",
   "TelegramEnabled": false,
   "TelegramBotToken": "",
   "TelegramChatId": "",
@@ -139,8 +142,9 @@ Los valores por defecto están en el código, así que el archivo es diminuto �
 
 ### Barra de acción
 
-- **Caster** → ataques en los slots **1, 2, 3**; cura en el slot **4**; buff propio (se relanza cada ~30 min) en el slot **5**.
+- **Primalist** → ataques en los slots **1, 2, 3**; cura en el slot **4**; el buff "Grove Instinct" en el slot **5** (se mantiene solo mientras esté en ese slot).
 - **Melee** → tus habilidades en los slots **1–6**.
+- **Pyromancer** → ataques en los slots **1, 2, 3**; cura en el slot **4**. Los dos buffs de mantenimiento se lanzan por nombre ("Seal of Al'ar", "Ashen Skin"), así que no dependen de un slot — solo asegúrate de que tu personaje los conoce.
 
 ### Créditos y licencia
 

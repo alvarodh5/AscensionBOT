@@ -5,20 +5,22 @@ using AscensionBot.Game.Objects;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 
-namespace CasterBot
+namespace PyromancerBot
 {
-    // "Primalist" profile: ranged classless caster for Ascension.
-    //  - Attacks from 20 yds with random abilities on action slots 1/2/3.
-    //  - Self-heal on slot 4 below 30% HP.
-    //  - Keeps the self-buff "Grove Instinct" up (slot 5), recast whenever it drops.
+    // "Pyromancer" profile: a copy of the Caster profile with three concrete improvements.
+    //  - Attacks from 25 yds with random abilities on action slots 1/2/3.
+    //  - Self-heal on slot 4 below 30% HP (in combat), and after every fight it tops back up to
+    //    75% HP on slot 4 before looking for the next enemy (improvement 1).
+    //  - Keeps two self-buffs always active: "Seal of Al'ar" and "Ashen Skin" (bound to keys
+    //    C and V); recasts either the moment it drops (improvement 2).
     //  - Only STARTS fights at >=75% HP and >=50% mana (defends if attacked regardless).
     //  - Rests after each fight. Loot disabled by default (toggle CasterLootEnabled in settings).
     [Export(typeof(IBot))]
-    class CasterBot : Bot, IBot
+    class PyromancerBot : Bot, IBot
     {
-        public string Name => "Primalist";
+        public string Name => "Pyromancer";
 
-        public string FileName => "CasterBot.dll";
+        public string FileName => "PyromancerBot.dll";
 
         // Only initiate VOLUNTARY combat when healthy enough. Threats bypass this filter
         // (FindClosestTarget returns FindThreat() before applying this), so we still defend
@@ -58,7 +60,7 @@ namespace CasterBot
                 probe,
                 hotspots);
 
-            // Start session stats + Telegram reporting + disconnect detection (Caster only).
+            // Start session stats + Telegram reporting + disconnect detection.
             SessionStats.Start(this, container);
 
             return container;

@@ -65,7 +65,7 @@ namespace AscensionBot
         public int? CurrentTravelPathId { get; set; }
         public int? CurrentGatherRouteId { get; set; }
 
-        public string CurrentBotName { get; set; } = "Caster";
+        public string CurrentBotName { get; set; } = "Primalist";
 
         // Killswitches off by default: calling Stop() also halts AntiAfk and disconnects us,
         // which is worse than staying connected for an unattended farmer. Real disconnects are

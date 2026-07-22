@@ -7,23 +7,24 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace CasterBot
+namespace PyromancerBot
 {
-    // Caster combat (self-contained, no class logic):
-    //  - Approaches to 20 yds, doesn't go to melee.
+    // Pyromancer combat (self-contained, no class logic):
+    //  - Approaches to 25 yds, doesn't go to melee (improvement 3).
     //  - Attacks with a RANDOM ability from slots 1/2/3.
     //  - Heals on slot 4 when below 30% HP.
-    //  - Self-buffs on slot 5 (~every 30 min).
+    //  - Keeps "Seal of Al'ar" and "Ashen Skin" up at all times (improvement 2).
     //  - While closing on a target, switches to a nearer mob that's actually attacking us
     //    instead of chasing a patroller and ignoring the thing hitting us.
     //  - On kill: keeps fighting anything still attacking us (defends properly), otherwise
-    //    loots (only if enabled in settings) and then rests before the next pull.
+    //    loots (only if enabled in settings) and then rests before the next pull. RestState is
+    //    what tops HP back up to 75% on slot 4 before we hunt again (improvement 1).
     class CombatState : IBotState
     {
         static readonly Random rng = new Random();
         static readonly int[] AttackSlots = { 1, 2, 3 };
         const int HealSlot = 4;
-        const int Range = 20;
+        const int Range = 25;
         const int HealBelowPct = 30;
 
         readonly Stack<IBotState> botStates;
@@ -72,7 +73,7 @@ namespace CasterBot
                 player.StopAllMovement();
 
                 // Small settle delay so the corpse/threat state is up to date.
-                if (!Wait.For("CasterPopCombat", 400))
+                if (!Wait.For("PyromancerPopCombat", 400))
                     return;
 
                 botStates.Pop();
@@ -86,8 +87,9 @@ namespace CasterBot
                     return;
                 }
 
-                // Rest after the fight (item 7). Loot first if enabled (off by default; see
-                // CasterLootEnabled in settings). LootState runs before RestState.
+                // Rest after the fight (improvement 1). RestState self-heals on slot 4 back up to
+                // 75% HP before we go looking for the next enemy. Loot first if enabled (off by
+                // default; see CasterLootEnabled in settings). LootState runs before RestState.
                 botStates.Push(new RestState(botStates, container));
                 if (loot && !stolen)
                     botStates.Push(new LootState(botStates, container, target));
@@ -105,7 +107,7 @@ namespace CasterBot
 
             var distance = player.Position.DistanceTo(target.Position);
 
-            // Approach to 20 yds. Straight line (no mmaps).
+            // Approach to 25 yds. Straight line (no mmaps).
             //
             // NOTE: we deliberately do NOT gate on player.InLosWith() here. The native LoS
             // raycast (Functions.Intersect) is unreliable on Ascension and would report "no LoS"
@@ -144,20 +146,22 @@ namespace CasterBot
             if (!player.IsFacing(target.Position))
                 player.Face(target.Position);
 
-            // Self-heal below 30% (item 3), slot 4.
+            // Self-heal below 30% (slot 4).
             if (player.HealthPercent < HealBelowPct)
             {
-                if (Wait.For("CasterHeal", 300))
-                    player.LuaCall($"UseAction({HealSlot})");
+                if (Wait.For("PyromancerHeal", 300))
+                    // Target ourselves to heal, then restore the enemy target so we keep attacking.
+                    player.LuaCall($"TargetUnit('player'); UseAction({HealSlot}); TargetLastTarget();");
                 return;
             }
 
-            // Periodic self-buff on slot 5 (~every 30 min). Lower priority than healing.
-            if (CasterBuff.TryBuff(player))
+            // Keep "Seal of Al'ar" and "Ashen Skin" up (improvement 2). Lower priority than
+            // healing, higher than attacking so a dropped buff is refreshed promptly.
+            if (PyromancerBuff.Maintain(player))
                 return;
 
-            // Random attack from slots 1/2/3 (item 2), throttled so we don't flood the server.
-            if (Wait.For("CasterAttack", 300))
+            // Random attack from slots 1/2/3, throttled so we don't flood the server.
+            if (Wait.For("PyromancerAttack", 300))
             {
                 var slot = AttackSlots[rng.Next(AttackSlots.Length)];
                 player.LuaCall($"UseAction({slot})");

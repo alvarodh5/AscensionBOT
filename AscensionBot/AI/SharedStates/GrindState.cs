@@ -16,6 +16,7 @@ namespace AscensionBot.AI.SharedStates
         readonly Stack<IBotState> botStates;
         readonly IDependencyContainer container;
         readonly LocalPlayer player;
+        readonly StuckHelper stuckHelper;
 
         // The spot where grinding started. When no mob is nearby we roam back toward it,
         // which keeps the bot in the chosen area and out of towns (no map/mmaps needed).
@@ -27,6 +28,7 @@ namespace AscensionBot.AI.SharedStates
             this.container = container;
             player = ObjectManager.Player;
             anchor = player.Position;
+            stuckHelper = new StuckHelper(botStates, container);
         }
 
         // Resurrection Sickness after a Spirit Healer res: -75% to all stats for ~10 min.
@@ -61,7 +63,14 @@ namespace AscensionBot.AI.SharedStates
                 if (hotspot?.Waypoints == null || hotspot.Waypoints.Length == 0)
                 {
                     if (player.Position.DistanceTo(anchor) > AnchorRadius)
+                    {
+                        // Anti-stuck: if we haven't moved for a second (wall/rock/ledge), push a
+                        // StuckState that jumps + strafes to break free. Straight-line movement
+                        // has no navmesh, so this is what stops us grinding against terrain.
+                        if (stuckHelper.CheckIfStuck())
+                            return;
                         player.MoveToward(anchor);
+                    }
                     else
                         player.StopAllMovement();
                     return;

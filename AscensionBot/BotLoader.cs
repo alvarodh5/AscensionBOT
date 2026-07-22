@@ -53,9 +53,9 @@ namespace AscensionBot
             container?.Dispose();
 
             var currentFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            // Only the two profiles we actually use: Caster and Tester (classless melee).
+            // The profiles we ship: Caster, Melee (classless) and Pyromancer.
             // The old class-specific bot DLLs are no longer loaded.
-            var botPaths = new[] { "CasterBot.dll", "MeleeBot.dll" };
+            var botPaths = new[] { "CasterBot.dll", "MeleeBot.dll", "PyromancerBot.dll" };
 
             foreach (var botPath in botPaths)
             {

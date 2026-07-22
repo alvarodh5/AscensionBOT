@@ -47,7 +47,8 @@ namespace AscensionBot
                 manaSpentTotal = 0; manaSamples = 0; combatStartManaPct = 0;
                 Running = true; DisconnectRequested = false;
                 ReadXp(out startLevel, out startXp, out startXpMax);
-                TelegramClientWrapper.SendMessage("▶️ Sesión de farmeo iniciada (Caster).");
+                var profile = (b as IBot)?.Name ?? "bot";
+                TelegramClientWrapper.SendMessage($"▶️ Sesión de farmeo iniciada ({profile}).");
             }
         }
 
@@ -174,7 +175,9 @@ namespace AscensionBot
             sb.AppendLine($"Tiempo en combate: {Fmt(combatMs)}");
             sb.AppendLine($"Tiempo en movimiento: {Fmt(moveMs)}");
             sb.AppendLine($"Tiempo descansando: {Fmt(restMs)}");
-            sb.AppendLine("Loot: desactivado");
+            var lootOn = false;
+            try { lootOn = container?.BotSettings?.CasterLootEnabled ?? false; } catch { }
+            sb.AppendLine($"Loot: {(lootOn ? "activado" : "desactivado")}");
             sb.AppendLine($"Maná neto medio/enemigo: {manaPerEnemy:0.0}%");
             sb.AppendLine($"Muertes del personaje: {characterDeaths}  |  /100 combates: {deathsPer100:0.0}");
             sb.AppendLine($"Objetivos abandonados: {targetsAbandoned}  |  en blacklist: {blacklist}");
