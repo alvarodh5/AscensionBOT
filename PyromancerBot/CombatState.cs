@@ -33,6 +33,7 @@ namespace PyromancerBot
         readonly LocalPlayer player;
         readonly bool loot;
         readonly StuckHelper stuckHelper;
+        readonly CombatWatchdog watchdog = new CombatWatchdog();
 
         internal CombatState(Stack<IBotState> botStates, IDependencyContainer container, WoWUnit target, bool loot = false)
         {
@@ -137,6 +138,8 @@ namespace PyromancerBot
                 if (stuckHelper.CheckIfStuck())
                     return;
 
+                // Not attacking yet -> don't let travel time count toward the give-up timer.
+                watchdog.Reset();
                 player.MoveToward(target.Position);
                 return;
             }
@@ -145,6 +148,19 @@ namespace PyromancerBot
 
             if (!player.IsFacing(target.Position))
                 player.Face(target.Position);
+
+            // In range but can't damage it for a while (no line of sight, behind a wall, on a
+            // ledge...)? Give up: blacklist it and pop back so we pick a different target instead
+            // of casting into a wall forever. Same idea as the melee CombatStateBase.
+            if (watchdog.ShouldGiveUp(target))
+            {
+                container.Probe?.BlacklistedMobIds?.Add(target.Guid);
+                if (container.BotSettings.PermanentlyBlacklistUnreachableTargets)
+                    Repository.AddBlacklistedMob(target.Guid);
+                player.StopAllMovement();
+                botStates.Pop();
+                return;
+            }
 
             // Self-heal below 30% (slot 4).
             if (player.HealthPercent < HealBelowPct)

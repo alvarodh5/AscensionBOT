@@ -53,9 +53,9 @@ namespace AscensionBot
             container?.Dispose();
 
             var currentFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            // The profiles we ship: Caster, Melee (classless) and Pyromancer.
-            // The old class-specific bot DLLs are no longer loaded.
-            var botPaths = new[] { "CasterBot.dll", "MeleeBot.dll", "PyromancerBot.dll" };
+            // The profiles we ship: Primalist (CasterBot.dll), Melee (classless), Pyromancer
+            // and Felsworn Infernal. The old class-specific bot DLLs are no longer loaded.
+            var botPaths = new[] { "CasterBot.dll", "MeleeBot.dll", "PyromancerBot.dll", "FelswornInfernalBot.dll" };
 
             foreach (var botPath in botPaths)
             {

@@ -5,10 +5,10 @@ using System.Text;
 
 namespace AscensionBot
 {
-    // Session statistics + Telegram reporting + disconnect detection for the Caster profile.
-    // Only active while Running (started by the Caster; the Melee profile never starts it, so
-    // everything here is a no-op for other profiles). Tick() is driven from the bot's main loop
-    // (main thread) so all game reads are safe — no extra threads, no deadlocks.
+    // Session statistics + Telegram reporting + disconnect detection. GLOBAL to the bot: started
+    // once from Bot.Start/Login/StartGathering/StartPowerlevel, so every profile gets it (before,
+    // only the ranged profiles started it). Tick() is driven from the bot's main loop (main
+    // thread) so all game reads are safe — no extra threads, no deadlocks.
     public static class SessionStats
     {
         static readonly object gate = new object();

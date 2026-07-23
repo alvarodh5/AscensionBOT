@@ -3,30 +3,27 @@ using AscensionBot.AI;
 using AscensionBot.AI.SharedStates;
 using AscensionBot.Game;
 using AscensionBot.Game.Objects;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace CasterBot
+namespace FelswornInfernalBot
 {
-    // Caster combat (self-contained, no class logic):
-    //  - Approaches to 20 yds, doesn't go to melee.
-    //  - Attacks with a RANDOM ability from slots 1/2/3.
-    //  - Heals on slot 4 when below 30% HP.
-    //  - Keeps the "Grove Instinct" buff up (slot 5).
-    //  - While closing on a target, switches to a nearer mob that's actually attacking us
-    //    instead of chasing a patroller and ignoring the thing hitting us.
-    //  - Gives up (blacklists) a target we can't damage for a while (behind a wall / no LoS) and
-    //    picks another — shared CombatWatchdog, matching the melee profile's behaviour.
-    //  - On kill: keeps fighting anything still attacking us (defends properly), otherwise
-    //    loots (only if enabled in settings) and then rests before the next pull.
+    // Felsworn Infernal combat (self-contained). Fixed rotation, cast BY SPELL NAME (so it doesn't
+    // depend on action-bar slots and can check real cooldowns / debuff presence):
+    //   "Hateforged Barrier" — shield + self-heal, recast every time its ~20s cooldown is up.
+    //   "Bane of Fire"       — damage-amplify debuff; kept on the target.
+    //   "Sargeron Smite"     — used whenever it's off cooldown.
+    //   "Fel Fireball"       — filler, spammed until the target dies.
+    // Plus the shared behaviour: approach to range, defend the real attacker, anti-stuck, and
+    // give up on targets we can't damage (behind a wall / no LoS).
     class CombatState : IBotState
     {
-        static readonly Random rng = new Random();
-        static readonly int[] AttackSlots = { 1, 2, 3 };
-        const int HealSlot = 4;
-        const int Range = 20;
-        const int HealBelowPct = 30;
+        internal const string Barrier = "Hateforged Barrier";
+        internal const string BaneOfFire = "Bane of Fire";
+        internal const string SargeronSmite = "Sargeron Smite";
+        internal const string FelFireball = "Fel Fireball";
+
+        const int Range = 25; // abilities reach 30 yds; keep a safe margin inside that.
 
         readonly Stack<IBotState> botStates;
         readonly IDependencyContainer container;
@@ -50,8 +47,8 @@ namespace CasterBot
         public void Update()
         {
             // Don't run any game/Lua logic unless we're actually in the world. Calling into the
-            // client (LuaCall/UseAction) during a loading screen / zoning / disconnect throws a
-            // native AccessViolationException that isn't catchable and crashes the bot.
+            // client during a loading screen / zoning / disconnect throws a native
+            // AccessViolationException that isn't catchable and crashes the bot.
             if (!ObjectManager.IsLoggedIn)
                 return;
 
@@ -75,13 +72,12 @@ namespace CasterBot
                 player.StopAllMovement();
 
                 // Small settle delay so the corpse/threat state is up to date.
-                if (!Wait.For("CasterPopCombat", 400))
+                if (!Wait.For("FelswornPopCombat", 400))
                     return;
 
                 botStates.Pop();
 
-                // If something else is still on us, keep fighting it instead of walking off to
-                // rest (this is what makes us actually defend when we get jumped mid-fight).
+                // If something else is still on us, keep fighting it instead of walking off to rest.
                 var threat = container.FindThreat();
                 if (threat != null && threat.Health > 0 && !threat.TappedByOther)
                 {
@@ -89,7 +85,7 @@ namespace CasterBot
                     return;
                 }
 
-                // Rest after the fight (item 7). Loot first if enabled (off by default; see
+                // Rest after the fight. Loot first if enabled (off by default; see
                 // CasterLootEnabled in settings). LootState runs before RestState.
                 botStates.Push(new RestState(botStates, container));
                 if (loot && !stolen)
@@ -98,8 +94,6 @@ namespace CasterBot
             }
 
             // Never interrupt our own cast — not even to chase a target that walked out of range.
-            // (This MUST be checked before the movement block below: otherwise chasing a moving
-            // patroller cancels every cast, so we run after it forever without landing a spell.)
             if (player.IsCasting || player.IsChanneling)
                 return;
 
@@ -108,18 +102,12 @@ namespace CasterBot
 
             var distance = player.Position.DistanceTo(target.Position);
 
-            // Approach to 20 yds. Straight line (no mmaps).
-            //
-            // NOTE: we deliberately do NOT gate on player.InLosWith() here. The native LoS
-            // raycast (Functions.Intersect) is unreliable on Ascension and would report "no LoS"
-            // even with a clear shot, leaving the caster walking in place forever — never
-            // attacking, never healing, and looking like it wanders off. The melee profile has
-            // the same policy (CombatStateBase relies on the client's LoS error message instead).
+            // Approach to ~25 yds. Straight line (no mmaps). We deliberately do NOT gate on
+            // player.InLosWith() — the native LoS raycast is unreliable on Ascension.
             if (distance > Range)
             {
-                // While still closing on our target, if a DIFFERENT mob is actually attacking us
-                // and is closer than the target we're chasing, switch to it. Otherwise we'd keep
-                // running after a patroller while something else beats on us unanswered.
+                // While closing in, if a DIFFERENT mob is actually attacking us and is closer than
+                // the target we're chasing, switch to it instead of ignoring the thing hitting us.
                 var attacker = ObjectManager.Units.FirstOrDefault(u =>
                     u != null && u.Guid != target.Guid && u.Health > 0 && !u.TappedByOther &&
                     (u.TargetGuid == player.Guid || u.TargetGuid == ObjectManager.Pet?.Guid) &&
@@ -133,8 +121,7 @@ namespace CasterBot
                     return;
                 }
 
-                // Anti-stuck: if we're not making progress toward the target (wall/rock/ledge),
-                // push a StuckState that jumps + strafes to break free instead of walking in place.
+                // Anti-stuck: jump/strafe out if we stop making progress against terrain.
                 if (stuckHelper.CheckIfStuck())
                     return;
 
@@ -149,9 +136,8 @@ namespace CasterBot
             if (!player.IsFacing(target.Position))
                 player.Face(target.Position);
 
-            // In range but can't damage it for a while (no line of sight, behind a wall, on a
-            // ledge...)? Give up: blacklist it and pop back so we pick a different target instead
-            // of casting into a wall forever. Same idea as the melee CombatStateBase.
+            // In range but can't damage it for a while (no line of sight, behind a wall...)? Give
+            // up: blacklist it and pop back so we pick a different target.
             if (watchdog.ShouldGiveUp(target))
             {
                 container.Probe?.BlacklistedMobIds?.Add(target.Guid);
@@ -162,24 +148,36 @@ namespace CasterBot
                 return;
             }
 
-            // Self-heal below 30% (item 3), slot 4.
-            if (player.HealthPercent < HealBelowPct)
+            // --- ROTATION (by spell name) ---
+            //
+            // IMPORTANT: we do NOT gate on player.IsSpellReady() here. The client cooldown read
+            // (IsSpellOnCooldown) is unreliable on Ascension — it tends to always report "ready",
+            // which made the top-priority spell (the Barrier) fire every single tick and starve
+            // the Fel Fireball filler (it never got cast). Instead we drive the fixed-cooldown
+            // spells on our own timers and let the game's global cooldown decide what actually
+            // fires when we press two spells in one tick (an on-cooldown cast simply fizzles).
+
+            // 1) "Hateforged Barrier" — shield + self-heal, every 20s no matter what.
+            if (Wait.For("FelswornBarrier", 20000))
             {
-                if (Wait.For("CasterHeal", 300))
-                    player.LuaCall($"UseAction({HealSlot})");
+                player.LuaCall($"CastSpellByName(\"{Barrier}\")");
                 return;
             }
 
-            // Keep the "Grove Instinct" buff up (slot 5). Lower priority than healing.
-            if (CasterBuff.TryBuff(player))
-                return;
-
-            // Random attack from slots 1/2/3 (item 2), throttled so we don't flood the server.
-            if (Wait.For("CasterAttack", 300))
+            // 2) "Bane of Fire" — keep the damage-amplify debuff on the target. Re-checked on a
+            //    throttle so a name/aura mismatch can't starve the filler by recasting every tick.
+            if (!target.HasDebuff(BaneOfFire) && Wait.For("FelswornBane", 1500))
             {
-                var slot = AttackSlots[rng.Next(AttackSlots.Length)];
-                player.LuaCall($"UseAction({slot})");
+                player.LuaCall($"CastSpellByName(\"{BaneOfFire}\")");
+                return;
             }
+
+            // 3+4) "Sargeron Smite" when it's available, otherwise spam "Fel Fireball". Pressing
+            //      both in one tick lets the GCD choose: Smite goes off if it's ready (and blocks
+            //      the fireball via the GCD); if Smite is on cooldown it fizzles and the fireball
+            //      casts. No cooldown read needed.
+            if (Wait.For("FelswornAttack", 300))
+                player.LuaCall($"CastSpellByName(\"{SargeronSmite}\"); CastSpellByName(\"{FelFireball}\");");
         }
     }
 }

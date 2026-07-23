@@ -62,6 +62,10 @@ namespace AscensionBot.AI
             {
                 running = true;
 
+                // Session stats + Telegram reporting + disconnect detection — a GLOBAL bot
+                // feature now, for every profile (idempotent: only the first call starts it).
+                SessionStats.Start(this, container);
+
                 ThreadSynchronizer.RunOnMainThread(() =>
                 {
                     botStates.Push(new LoginState(botStates, container, onLoginComplete: () =>
@@ -109,6 +113,10 @@ namespace AscensionBot.AI
             try
             {
                 running = true;
+
+                // Session stats + Telegram reporting + disconnect detection — a GLOBAL bot
+                // feature now, for every profile (idempotent: only the first call starts it).
+                SessionStats.Start(this, container);
 
                 ThreadSynchronizer.RunOnMainThread(() =>
                 {
@@ -194,6 +202,10 @@ namespace AscensionBot.AI
             {
                 running = true;
 
+                // Session stats + Telegram reporting + disconnect detection — a GLOBAL bot
+                // feature now, for every profile (idempotent: only the first call starts it).
+                SessionStats.Start(this, container);
+
                 ThreadSynchronizer.RunOnMainThread(() =>
                 {
                     container.BotSettings.LastUsedBotType = BotSettings.BotType.Powerlevel;
@@ -222,6 +234,10 @@ namespace AscensionBot.AI
             try
             {
                 running = true;
+
+                // Session stats + Telegram reporting + disconnect detection — a GLOBAL bot
+                // feature now, for every profile (idempotent: only the first call starts it).
+                SessionStats.Start(this, container);
 
                 ThreadSynchronizer.RunOnMainThread(() =>
                 {

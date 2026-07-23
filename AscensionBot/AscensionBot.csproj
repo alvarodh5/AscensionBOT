@@ -186,6 +186,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="AI\Bot.cs" />
+    <Compile Include="AI\CombatWatchdog.cs" />
     <Compile Include="AI\DependencyContainer.cs" />
     <Compile Include="AI\IBot.cs" />
     <Compile Include="AI\IBotState.cs" />

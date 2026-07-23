@@ -60,9 +60,6 @@ namespace PyromancerBot
                 probe,
                 hotspots);
 
-            // Start session stats + Telegram reporting + disconnect detection.
-            SessionStats.Start(this, container);
-
             return container;
         }
 

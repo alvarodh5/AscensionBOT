@@ -25,12 +25,14 @@ A simple, autonomous grinder: it finds a nearby mob, walks to it, kills it, and 
 | **Primalist** | Ranged. Engages from 20 yds, casts random abilities from action slots **1/2/3**, self-heals with slot **4** below 30% HP, and keeps the self-buff **"Grove Instinct"** (slot **5**) up, recasting it whenever it drops (incl. after resurrecting). Only starts a fight at ≥75% HP and ≥50% mana (but defends itself if attacked), rests after every fight. Looting is **off by default** (enable with `CasterLootEnabled`). Sends a Telegram session report. |
 | **Melee** | Classless melee. Walks into melee range and spams action slots **1–6** + auto-attack, loots and skins. Includes a `Test` diagnostic that dumps player/offset info. |
 | **Pyromancer** | Ranged variant of Primalist with three tweaks: (1) after every fight it actively tops HP back up with slot **4** before hunting again (instead of waiting for regen); (2) keeps two self-buffs always up — **"Seal of Al'ar"** and **"Ashen Skin"** — recasting either the moment it drops; (3) attacks from 25 yds. Same "only start a fight at ≥75% HP / ≥50% mana, defend if attacked" rule. Sends a Telegram session report. |
+| **Felsworn Infernal** | Ranged (~25 yds), fixed rotation cast **by spell name** (no action-bar slots needed): recasts **"Hateforged Barrier"** (shield + self-heal) every time its ~20s cooldown is up, keeps **"Bane of Fire"** (damage amp) on the target, fires **"Sargeron Smite"** whenever it's off cooldown, and spams **"Fel Fireball"** as filler until the mob dies. Same "only start a fight at ≥75% HP / ≥50% mana, defend if attacked" rule; rests after every fight. Sends a Telegram session report. |
 
 ### Features
 
 - **In-process DLL injection** into the running `Ascension.exe` (attach to a client already launched by the Ascension launcher).
 - **Classless combat** — no spell names, no class assumptions; it just presses your action-bar buttons.
 - **Straight-line movement** — no navmesh/mmaps required (best on open terrain).
+- **Shared behaviour across all profiles** — anti-stuck (jumps/strafes when caught on terrain), never targets pets or other player-controlled units, and gives up on a target it can't damage for ~20s (behind a wall / no line of sight): it blacklists that mob and moves to the next one.
 - **Death recovery** — resurrects at the Spirit Healer and waits out Resurrection Sickness before fighting again.
 - **Telegram notifications** — level ups, deaths/resurrects, rare loot, a stats report every 30 minutes, and on stop.
 - **Disconnect handling** — detects a lost connection (≥5s) and stops with a final report; a **watchdog in the Bootstrapper** alerts you on Telegram if the game process itself crashes or closes.
@@ -73,6 +75,7 @@ Sensible defaults live in code, so the file is tiny — you only override what y
 - **Primalist** → attacks on slots **1, 2, 3**; heal on slot **4**; the "Grove Instinct" buff on slot **5** (kept up automatically while it's on that slot).
 - **Melee** → your abilities on slots **1–6**.
 - **Pyromancer** → attacks on slots **1, 2, 3**; heal on slot **4**. The two upkeep buffs are cast by name ("Seal of Al'ar", "Ashen Skin"), so they don't depend on a slot — just make sure your character knows them.
+- **Felsworn Infernal** → no action-bar slots needed; it casts by name. Just make sure your character knows **"Hateforged Barrier"**, **"Bane of Fire"**, **"Sargeron Smite"** and **"Fel Fireball"**.
 
 ### Credits & License
 
@@ -97,12 +100,14 @@ Un farmeador simple y autónomo: busca un bicho cercano, va hacia él, lo mata y
 | **Primalist** | A distancia. Ataca desde 20 yardas, lanza habilidades aleatorias de los slots **1/2/3**, se cura con el slot **4** por debajo del 30% de vida y mantiene el buff propio **"Grove Instinct"** (slot **5**), relanzándolo en cuanto se cae (incl. tras resucitar). Solo inicia combate con ≥75% de vida y ≥50% de maná (pero se defiende si le atacan), descansa tras cada pelea. El loot está **desactivado por defecto** (actívalo con `CasterLootEnabled`). Envía un informe de sesión por Telegram. |
 | **Melee** | Cuerpo a cuerpo classless. Se acerca y machaca los slots **1–6** + auto-ataque, lootea y desuella. Incluye un `Test` de diagnóstico que vuelca info del jugador/offsets. |
 | **Pyromancer** | Variante a distancia del Primalist con tres mejoras: (1) tras cada pelea se recupera activamente la vida con el slot **4** antes de volver a cazar (en vez de esperar a la regeneración); (2) mantiene dos buffs propios siempre activos — **"Seal of Al'ar"** y **"Ashen Skin"** — relanzando cualquiera en cuanto se cae; (3) ataca desde 25 yardas. Misma regla de "solo inicia combate con ≥75% de vida / ≥50% de maná, se defiende si le atacan". Envía un informe de sesión por Telegram. |
+| **Felsworn Infernal** | A distancia (~25 yardas), rotación fija lanzada **por nombre de hechizo** (no necesita slots): relanza **"Hateforged Barrier"** (escudo + autocura) cada vez que su CD de ~20s está listo, mantiene **"Bane of Fire"** (amplifica daño) en el objetivo, usa **"Sargeron Smite"** siempre que esté disponible, y spamea **"Fel Fireball"** de relleno hasta que el bicho muere. Misma regla de "solo inicia combate con ≥75% de vida / ≥50% de maná, se defiende si le atacan"; descansa tras cada pelea. Envía un informe de sesión por Telegram. |
 
 ### Características
 
 - **Inyección de DLL en el proceso** `Ascension.exe` (se engancha a un cliente ya abierto por el launcher de Ascension).
 - **Combate classless** — sin nombres de hechizos ni suposiciones de clase; solo pulsa los botones de tu barra.
 - **Movimiento en línea recta** — no requiere navmesh/mmaps (ideal en terreno abierto).
+- **Comportamiento común a todos los perfiles** — antistuck (salta/estrafea si se atasca en el terreno), nunca targetea mascotas u otras unidades controladas por jugadores, y abandona un objetivo al que no puede dañar durante ~20s (tras un muro / sin línea de visión): lo mete en blacklist y pasa al siguiente.
 - **Recuperación tras morir** — resucita en el Sanador de Espíritus y espera a que pase la enfermedad por resurrección antes de volver a pelear.
 - **Avisos por Telegram** — subidas de nivel, muertes/resurrecciones, botín raro, un informe de estadísticas cada 30 minutos y al detenerse.
 - **Gestión de desconexión** — detecta pérdida de conexión (≥5s) y se detiene con informe final; un **vigilante en el Bootstrapper** te avisa por Telegram si el proceso del juego crashea o se cierra.
@@ -145,6 +150,7 @@ Los valores por defecto están en el código, así que el archivo es diminuto �
 - **Primalist** → ataques en los slots **1, 2, 3**; cura en el slot **4**; el buff "Grove Instinct" en el slot **5** (se mantiene solo mientras esté en ese slot).
 - **Melee** → tus habilidades en los slots **1–6**.
 - **Pyromancer** → ataques en los slots **1, 2, 3**; cura en el slot **4**. Los dos buffs de mantenimiento se lanzan por nombre ("Seal of Al'ar", "Ashen Skin"), así que no dependen de un slot — solo asegúrate de que tu personaje los conoce.
+- **Felsworn Infernal** → no necesita slots; lanza por nombre. Solo asegúrate de que tu personaje conoce **"Hateforged Barrier"**, **"Bane of Fire"**, **"Sargeron Smite"** y **"Fel Fireball"**.
 
 ### Créditos y licencia
 

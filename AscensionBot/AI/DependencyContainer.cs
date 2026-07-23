@@ -54,6 +54,36 @@ namespace AscensionBot.AI
 
         public IEnumerable<Hotspot> Hotspots { get; }
 
+        // Our own pet's GUID, asked directly to the client via Lua. This is the DEFINITIVE way to
+        // identify the pet — the descriptor-based signals (SummonedByGuid, the PLAYER_CONTROLLED
+        // unit flag, UnitReaction) all read unreliably for pets on Ascension, so the bot would
+        // sometimes still target its own pet. Cached and refreshed at most once/second so we don't
+        // hammer the Lua engine every targeting pass.
+        ulong ownPetGuid;
+        int ownPetGuidRefreshTick = int.MinValue;
+
+        ulong GetOwnPetGuid()
+        {
+            if (Environment.TickCount - ownPetGuidRefreshTick <= 1000)
+                return ownPetGuid;
+
+            ownPetGuidRefreshTick = Environment.TickCount;
+            try
+            {
+                var results = ObjectManager.Player?.LuaCallWithResults("{0} = UnitGUID('pet')");
+                if (results != null && results.Length > 0 && !string.IsNullOrWhiteSpace(results[0]))
+                {
+                    var s = results[0].StartsWith("0x") ? results[0].Substring(2) : results[0];
+                    ownPetGuid = ulong.TryParse(s, System.Globalization.NumberStyles.HexNumber, null, out var g) ? g : 0;
+                }
+                else
+                    ownPetGuid = 0;
+            }
+            catch { ownPetGuid = 0; }
+
+            return ownPetGuid;
+        }
+
         // this is broken up into multiple sub-expressions to improve readability and debuggability
         public WoWUnit FindThreat()
         {
@@ -107,9 +137,15 @@ namespace AscensionBot.AI
                 return checkThreat;
             }
 
+            // Definitive own-pet exclusion (see GetOwnPetGuid): the client tells us our pet's
+            // GUID directly, so we never target it regardless of how its descriptor flags read.
+            var petGuid = GetOwnPetGuid();
+
             var potentialTargetsList = ObjectManager.Units
                 // only consider units that are not null, and whose name and position are not null
                 .Where(u => u != null && u.Name != null && u.Position != null)
+                // never target our own pet
+                .Where(u => petGuid == 0 || u.Guid != petGuid)
                 // only consider living units whose health is > 0
                 .Where(u => u.Health > 0)
                 // only consider units that have not already been tapped by another played

@@ -5,20 +5,25 @@ using AscensionBot.Game.Objects;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 
-namespace CasterBot
+namespace FelswornInfernalBot
 {
-    // "Primalist" profile: ranged classless caster for Ascension.
-    //  - Attacks from 20 yds with random abilities on action slots 1/2/3.
-    //  - Self-heal on slot 4 below 30% HP.
-    //  - Keeps the self-buff "Grove Instinct" up (slot 5), recast whenever it drops.
+    // "Felsworn Infernal" profile: ranged classless caster for Ascension.
+    //  - Engages from ~25 yds, doesn't go to melee.
+    //  - Fixed rotation, cast BY SPELL NAME (independent of action-bar slots):
+    //      "Hateforged Barrier" = shield + self-heal, recast every time its ~20s cooldown is up
+    //      "Bane of Fire"       = damage-amplify debuff, kept on the target
+    //      "Sargeron Smite"     = used whenever it's off cooldown
+    //      "Fel Fireball"       = filler, spammed until the target dies
     //  - Only STARTS fights at >=75% HP and >=50% mana (defends if attacked regardless).
     //  - Rests after each fight. Loot disabled by default (toggle CasterLootEnabled in settings).
+    //  - Shares the common behaviour: anti-stuck, never targets pets, gives up on targets it
+    //    can't damage (behind a wall / no LoS) and switches, defends the attacker on interrupt.
     [Export(typeof(IBot))]
-    class CasterBot : Bot, IBot
+    class FelswornInfernalBot : Bot, IBot
     {
-        public string Name => "Primalist";
+        public string Name => "Felsworn Infernal";
 
-        public string FileName => "CasterBot.dll";
+        public string FileName => "FelswornInfernalBot.dll";
 
         // Only initiate VOLUNTARY combat when healthy enough. Threats bypass this filter
         // (FindClosestTarget returns FindThreat() before applying this), so we still defend
